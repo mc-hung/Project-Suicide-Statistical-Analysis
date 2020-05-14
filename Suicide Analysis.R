@@ -1,0 +1,579 @@
+##title: "IE6200 Final_Hung"
+##output: html_document
+
+read.csv("/cloud/project/SuicideData.csv")
+data <- read.csv("SuicideData.csv")
+head(data)
+summary(data)
+
+##Subset data where country = United States
+data.US <- subset(data, data$country=="United States")
+##Calculate the total suicide each year from all age ranges
+us1985 <- sum(data.US$suicides_no[data.US$year=="1985"])
+us1986 <- sum(data.US$suicides_no[data.US$year=="1986"])
+us1987 <- sum(data.US$suicides_no[data.US$year=="1987"])
+us1988 <- sum(data.US$suicides_no[data.US$year=="1988"])
+us1989 <- sum(data.US$suicides_no[data.US$year=="1989"])
+us1990 <- sum(data.US$suicides_no[data.US$year=="1990"])
+us1991 <- sum(data.US$suicides_no[data.US$year=="1991"])
+us1992 <- sum(data.US$suicides_no[data.US$year=="1992"])
+us1993 <- sum(data.US$suicides_no[data.US$year=="1993"])
+us1994 <- sum(data.US$suicides_no[data.US$year=="1994"])
+us1995 <- sum(data.US$suicides_no[data.US$year=="1995"])
+us1996 <- sum(data.US$suicides_no[data.US$year=="1996"])
+us1997 <- sum(data.US$suicides_no[data.US$year=="1997"])
+us1998 <- sum(data.US$suicides_no[data.US$year=="1998"])
+us1999 <- sum(data.US$suicides_no[data.US$year=="1999"])
+us2000 <- sum(data.US$suicides_no[data.US$year=="2000"])
+us2001 <- sum(data.US$suicides_no[data.US$year=="2001"])
+us2002 <- sum(data.US$suicides_no[data.US$year=="2002"])
+us2003 <- sum(data.US$suicides_no[data.US$year=="2003"])
+us2004 <- sum(data.US$suicides_no[data.US$year=="2004"])
+us2005 <- sum(data.US$suicides_no[data.US$year=="2005"])
+us2006 <- sum(data.US$suicides_no[data.US$year=="2006"])
+us2007 <- sum(data.US$suicides_no[data.US$year=="2007"])
+us2008 <- sum(data.US$suicides_no[data.US$year=="2008"])
+us2009 <- sum(data.US$suicides_no[data.US$year=="2009"])
+us2010 <- sum(data.US$suicides_no[data.US$year=="2010"])
+us2011 <- sum(data.US$suicides_no[data.US$year=="2011"])
+us2012 <- sum(data.US$suicides_no[data.US$year=="2012"])
+us2013 <- sum(data.US$suicides_no[data.US$year=="2013"])
+us2014 <- sum(data.US$suicides_no[data.US$year=="2014"])
+us2015 <- sum(data.US$suicides_no[data.US$year=="2015"])
+
+
+##Create a data frame to plot QQ plot
+UStotal <- data.frame("Year" = 1985:2015, TotalSuicide = c(us1985, us1986, us1987, 
+                                                           us1988, us1989, us1990, 
+                                                           us1991, us1992, us1993, 
+                                                           us1994, us1995, us1996, 
+                                                           us1997, us1998, us1999, 
+                                                           us2000, us2001, us2002, 
+                                                           us2003, us2004, us2005, 
+                                                           us2006, us2007, us2008, 
+                                                           us2009, us2010, us2011, 
+                                                           us2012, us2013, us2014, us2015))
+UStotal
+
+### ONE SAMPLE t-TEST - Traditional
+
+##Null Hypothesis: mu = 47085 (The true mean suicide number per year is 47085)
+##Alternate Hypothesis: mu  != 47085 (The true mean suicide number per year is different than 47085)
+
+
+##QQ plot
+qqnorm(UStotal$TotalSuicide)
+
+##sample mean
+x_bar1 <- mean(UStotal$TotalSuicide)
+##mu_0
+mu_01 <- 47085
+##sample SD
+s1 <- sd(UStotal$TotalSuicide)
+##number of years
+n1 <- 31
+##t-test test statistic
+t1 <- (x_bar1 - mu_01)/(s1/sqrt(n1))
+##two-sided p-value
+two_sided_t_p1 <- pt(q = t1, df = n1-1)*2
+two_sided_t_p1
+
+##CI
+lower1 <- x_bar1 + (qt(0.025, n1-1)*(s1/sqrt(n1)))
+upper1 <- x_bar1 + (qt(0.975, n1-1)*(s1/sqrt(n1)))
+lower1
+upper1
+
+t.test(UStotal$TotalSuicide, alternative = "two.sided", mu = 47085)
+
+### ONE SAMPLE t-Test - Bootstrap Approach
+
+##Simulations 100 times
+set.seed(111)
+num_sims1 <- 10000
+##A vector to store my results
+results1 <- rep(NA, num_sims1)
+##A loop for completing the simulation
+for(i in 1:num_sims1){
+  results1[i] <- mean(sample(x = UStotal$TotalSuicide, size = n1, replace = TRUE))
+}
+##Finally plot the results
+hist(results1, freq = FALSE, main = "Sampling Distribution of the Sample Mean", 
+     xlab = "Average Suicide Numbers", ylab = "Density")
+##Estimate a normal curve over it
+lines(x = seq(31000,36000, 1), dnorm(seq(31000,36000, 1), mean = x_bar1, 
+                                     sd = sd(UStotal$TotalSuicide)/sqrt(n1)))
+
+##Shift the sample so that the null hypothesis is true
+set.seed(111)
+time_given_H0_true1 <- UStotal$TotalSuicide - mean(UStotal$TotalSuicide) + mu_01
+##Simulations
+num_sims2 <- 10000
+##A Vector to store my results
+results_given_h0_true1 <- rep(NA, num_sims2)
+##A loop for completing the simulation
+for(i in 1:num_sims2){
+  results_given_h0_true1[i] <- mean(sample(x = time_given_H0_true1, size = n1, replace = TRUE))
+}
+#Finally Plot the results
+hist(results_given_h0_true1, freq = FALSE, main = "Sampling Distribution Null is True", 
+     xlab = "Number of Suicide", ylab = "Density")
+
+set.seed(111)
+##More extreme on lower end
+low_end_extreme <- mean(results_given_h0_true1)+(mean(results_given_h0_true1)-x_bar1)
+##Counts of values more extreme than the test statistic in our original sample, given H0 is true
+##Two sided given the alternate hypothesis
+count_of_more_extreme_lower <- sum(results_given_h0_true1 >= low_end_extreme)
+count_of_more_extreme_upper <- sum(results_given_h0_true1 <= x_bar1)
+
+bootsrtap_p1 <- (count_of_more_extreme_lower + count_of_more_extreme_upper)/num_sims2
+bootsrtap_p1
+two_sided_t_p1
+
+##CI of bootstrap
+##Need the standard error which is the sd of the results
+bootstrap_SE_x_bar1 <- sd(results1)
+##An estimate is to use the formula statisitc +/- 2*SE
+c(x_bar1 - 2*bootstrap_SE_x_bar1, x_bar1 + 2*bootstrap_SE_x_bar1)
+
+##Find 5th and 95th quantiles to determine the bounds
+c(quantile(results1, c(0.025, 0.975)))
+
+##Compare t-methods
+c(x_bar1 + (qt(0.025, n1-1)*(s1/sqrt(n1))), x_bar1+qt(0.975, n1-1)*(s1/sqrt(n1)))
+
+### ONE SAMPLE PROPORTION TEST - Traditional
+
+totalUS_R1 <- sum(data.US$suicides_no[data.US$age=="5-14 years"])
+totalUS_R2 <- sum(data.US$suicides_no[data.US$age=="15-24 years"])
+totalUS_R3 <- sum(data.US$suicides_no[data.US$age=="25-34 years"])
+totalUS_R4 <- sum(data.US$suicides_no[data.US$age=="35-54 years"])
+totalUS_R5 <- sum(data.US$suicides_no[data.US$age=="55-74 years"])
+totalUS_R6 <- sum(data.US$suicides_no[data.US$age=="75+ years"])
+totalUS <- sum(data.US$suicides_no)
+
+z1 <- ((totalUS_R3/totalUS)-(1/6)) / sqrt(((1/6)*(5/6))/totalUS)
+z1
+
+binom.test(x = totalUS_R3, n = totalUS, p=(1/6), alternative = "greater")
+
+pnorm(z1, lower.tail = FALSE)
+
+binom.test(x = totalUS_R3, n = totalUS, p=(1/6), alternative = "greater")$conf.int
+
+##normal approx - greater
+c((totalUS_R3/totalUS) - 1.64*(((totalUS_R3/totalUS)*(1-(totalUS_R3/totalUS)))/totalUS),1)
+
+binom.test(x = totalUS_R3, n = totalUS, p=(1/6), alternative = "two.sided")$conf.int
+
+##normal approx - two.sided
+c((totalUS_R3/totalUS) - 1.64*(((totalUS_R3/totalUS)*(1-(totalUS_R3/totalUS)))/totalUS),
+  (totalUS_R3/totalUS) + 1.64*(((totalUS_R3/totalUS)*(1-(totalUS_R3/totalUS)))/totalUS))
+
+## One proportion for 101 countries
+total_R1 <- sum(data$suicides_no[data$age=="5-14 years"])
+total_R2 <- sum(data$suicides_no[data$age=="15-24 years"])
+total_R3 <- sum(data$suicides_no[data$age=="25-34 years"])
+total_R4 <- sum(data$suicides_no[data$age=="35-54 years"])
+total_R5 <- sum(data$suicides_no[data$age=="55-74 years"])
+total_R6 <- sum(data$suicides_no[data$age=="75+ years"])
+total <- sum(data$suicides_no)
+
+##binom test for 101 countries - one sided
+binom.test(x = total_R3, n = total, p=(1/6), alternative = "greater")
+
+##binom test for 101 countries - two sided
+binom.test(x = total_R3, n = total, p=(1/6), alternative = "two.sided")
+
+### ONE SAMPLE TEST of PROPORTION - Boostrap Approach
+
+Range3 <- factor(rep(c("25-34 years", "other"), c(totalUS_R3, (totalUS - totalUS_R3))))
+table(Range3)
+
+##Easier to use for bootstrapping
+Range3_ <- rep(c(1, 0), c(totalUS_R3, (totalUS - totalUS_R3)))
+
+set.seed(111)
+##Simulations
+num_sims3 <- 1000
+##A vector to store results
+results2 <- rep(NA, num_sims3)
+##A loop for completing the simulations
+for(i in 1:num_sims3){
+  results2[i] <- mean(sample(x = Range3_, size = totalUS, replace = TRUE))
+}
+##Finally plot
+hist(results2, freq = FALSE, main = "Sampling Distribution of the Sample Proportion", 
+     xlab = "Proportion of 25-34 years old", ylab = "Density")
+##Estimate a normal curve over it
+lines(x = seq(0.1745, 0.1775, 0.0001), dnorm(seq(0.1745, 0.1775, 0.0001), mean = mean(results2), 
+                                             sd = sd(results2)))
+
+##CI of bootstrap
+c(quantile(results2, c(0.05, 1)))
+
+binom.test(x = totalUS_R3, n = totalUS, p=(1/6), alternative = "greater")$conf.int
+
+c((totalUS_R3/totalUS) - 1.64*sqrt(((totalUS_R3/totalUS)*(1-(totalUS_R3/totalUS)))/totalUS),1)
+
+Range3_2 <- rep(c(1, 0), c(totalUS/6, (totalUS*5/6)))
+
+##Under Null is TRUE
+set.seed(111)
+##Simulations
+num_sims4 <- 100
+##A vector to store results
+results3 <- rep(NA, num_sims4)
+##A loop for completing the simulations
+for(i in 1:num_sims4){
+  results3[i] <- mean(sample(x = Range3_2, size = totalUS, replace = TRUE))
+}
+##Finally plot
+hist(results3, freq = FALSE, main = "Sampling Distribution of the Sample Proportion", 
+     xlab = "Proportion of 25-34 years old", ylab = "Density")
+##Estimate a normal curve over it
+lines(x = seq(0.1655, 0.1690, 0.0001), dnorm(seq(0.1655, 0.1690, 0.0001), mean = mean(results3), 
+                                             sd = sd(results3)))
+abline(v = (1/6), col="red")
+
+propR3 <- totalUS_R3/totalUS
+##Count extreme
+count_of_more_extreme_uppertail <- sum(results3 >= propR3)
+bootstrap_p2 <- count_of_more_extreme_uppertail/num_sims4
+bootstrap_p2
+
+##Exact Binomial p-value
+binom.test(x = totalUS_R3, n = totalUS, p=(1/6), alternative = "greater")$p.value
+
+##Normal Approx
+pnorm(z1, lower.tail = FALSE)
+
+### TWO SAMPLE t-Test - Traditional
+
+##two populations are female and male, with numbers of suicide per 100k people
+##install.packages("tidyverse")
+##library(tidyverse)
+##data.US  %>% select(2:7)
+
+##QQ plot of suicide number of male and female in different age ranges
+qqnorm(data.US$suicides.100k.pop)
+
+##QQ Plot of suicide number of female in different age ranges
+qqnorm(data.US$suicides.100k.pop[data.US$sex=="female"])
+
+##QQ Plot of suicide number of male in different age ranges
+qqnorm(data.US$suicides.100k.pop[data.US$sex=="male"])
+
+##sample means
+x_bar_f <- mean(data.US$suicides.100k.pop[data.US$sex=="female"])
+x_bar_m <- mean(data.US$suicides.100k.pop[data.US$sex=="male"])
+##null hypothesized population mean difference between the two groups
+mu_02 <- 0
+##sample variances
+s_f_sq <- sd(data.US$suicides.100k.pop[data.US$sex=="female"])**2
+s_m_sq <- sd(data.US$suicides.100k.pop[data.US$sex=="male"])**2
+##sample size
+n_f <- length(data.US$suicides.100k.pop[data.US$sex=="female"])
+n_m <- length(data.US$suicides.100k.pop[data.US$sex=="male"])
+##t-test test statistic
+t2 <- (x_bar_f - x_bar_m - mu_02)/sqrt((s_f_sq/n_f)+(s_m_sq/n_m))
+##one sided upper p-value
+one_sided_diff_t_p <- pt(q=t2, df=(min(n_f, n_m)-1), lower.tail = TRUE)*2
+one_sided_diff_t_p
+
+##lower bound
+(x_bar_f - x_bar_m) + (qt(0.025, min(n_f, n_m)-1)*sqrt((s_f_sq/n_f)+(s_m_sq/n_m)))
+
+##upper bound
+(x_bar_f - x_bar_m) + (qt(0.975, min(n_f, n_m)-1)*sqrt((s_f_sq/n_f)+(s_m_sq/n_m)))
+
+##use t-test function in R
+t.test(data.US$suicides.100k.pop[data.US$sex=="female"],data.US$suicides.100k.pop[data.US$sex=="male"])
+
+### TWO SAMPLE Diff in Mean - Bootstrap Approach
+
+##install.packages('mosaic')
+require(mosaic)
+set.seed(111)
+x_hist1 <- data.US %>%
+  filter(data.US$sex== "female")
+x_hist1 <- do(1000) * mean(sample(data.US$suicides.100k.pop,20))
+h1 <- hist(x_hist1$mean, main = "Sampling Distribution For Female", xlab = "Mean of Suicides per 100k people", 
+           prob = T, col = "grey")
+lines(density(x_hist1$mean), col = "blue", lwd = 2)
+h1
+
+require(mosaic)
+set.seed(111)
+x_hist0 <- data.US %>%
+  filter(data.US$sex=="male")
+x_hist0 <- do(1000) * mean(sample(data.US$suicides.100k.pop,20))
+h0 <- hist(x_hist1$mean, main = "Sampling Distribution For Male", xlab = "Mean of Suicides per 100k people", 
+           prob = T, col = "grey")
+lines(density(x_hist0$mean), col = "blue", lwd = 2)
+h0
+
+num_sims5 <- 1000
+##A vector to store results
+results4 <- rep(NA, num_sims5)
+##A loop for completing the simulations
+for(i in 1:num_sims5){
+  mean_female <- mean(sample(x = data.US$suicides.100k.pop[data.US$sex=="female"], size = n_f, replace = TRUE))
+  mean_male <- mean(sample(x = data.US$suicides.100k.pop[data.US$sex=="male"], size = n_m, replace = TRUE))
+  results4[i] <- mean_female - mean_male
+}
+##Finally plot
+hist(results4, freq = FALSE, main = "Sampling Distribution of the Sample Mean", 
+     xlab = "Number of Suicide Difference", ylab = "Density")
+
+##Bootstrap one-sided CI
+c(quantile(results4, c(0.025, 0.975)))
+
+##T-method
+t.test(data.US$suicides.100k.pop[data.US$sex=="female"],
+       data.US$suicides.100k.pop[data.US$sex=="male"])$conf.int
+
+set.seed(111)
+num_sims6 <- 1000
+##A vector to store results
+results_given_h0_true2 <- rep(NA, num_sims6)
+##A loop for completing the simulation
+for(i in 1:num_sims6){
+  shuffled_groups <- transform(data.US, sex = sample(sex))
+  mean_female2 <- mean(shuffled_groups$suicides.100k.pop[shuffled_groups$sex=="female"])
+  mean_male2 <- mean(shuffled_groups$suicides.100k.pop[shuffled_groups$sex=="male"])
+  results_given_h0_true2[i] <- mean_female2 - mean_male2
+}
+##Finally plot
+hist(results_given_h0_true2, freq = FALSE, main = "Dist. of the Diff in  Sample Means Under Null", xlab  =  "Average Number of Suicide Difference under Null", ylab = "Density")
+diff_in_samplemean <- mean(data.US$suicides.100k.pop[data.US$sex=="female"]) - mean(data.US$suicides.100k.pop[data.US$sex=="male"])
+diff_in_samplemean
+##abline(v=diff_in_samplemean, col = "blue")
+##abline(v=abs(diff_in_samplemean), col = "red")
+
+##Count of values more extreme
+##Two sided given
+count_of_more_extreme_lower2 <- sum(results_given_h0_true2 <= diff_in_samplemean)
+count_of_more_extreme_upper2 <- sum(results_given_h0_true2 >= abs(diff_in_samplemean))
+
+boostrap_p2 <- (count_of_more_extreme_lower2 + count_of_more_extreme_upper2)/num_sims6
+boostrap_p2
+
+t.test(data.US$suicides.100k.pop[data.US$sex=="female"],
+       data.US$suicides.100k.pop[data.US$sex=="male"])$p.value
+
+### TWO SAMPLE DIFF IN PROPORTION - Traditional
+
+##suicides in two different popultaions: Female and Male
+dataUS_male <- subset(data.US, data.US$sex=="male")
+dataUS_female <- subset(data.US, data.US$sex=="female")
+
+##data2 <- aggregate(suicides.100k.pop ~ year+sex, data=data.US, FUN=sum) 
+##data3 <- aggregate(suicides_no~ year, data=dataUS_female, FUN=sum)
+##data4 <- aggregate(population~ year, data=dataUS_female, FUN=sum) 
+
+##sample props
+p_hat_f2 <- sum(dataUS_female$suicides_no)/sum(dataUS_female$population)
+p_hat_m2 <- sum(dataUS_male$suicides_no)/sum(dataUS_male$population)
+#null hypothesized population pro difference between the two group
+p_0 <- 0
+#sample size
+n_f2 <- sum(dataUS_female$population)
+n_m2 <- sum(dataUS_male$population)
+#sample variances
+den_p_f2 <- (p_hat_f2*(1-p_hat_f2))/n_f2
+den_p_m2 <- (p_hat_m2*(1-p_hat_m2))/n_m2
+#z-test test statistic
+z <- (p_hat_m2 - p_hat_f2 - p_0)/sqrt(den_p_f2 + den_p_m2)
+#two sided p-value
+two_sided_diff_prop_p<- pnorm(q=z, lower.tail = FALSE)*2
+two_sided_diff_prop_p
+
+##lower bound
+(p_hat_f2-p_hat_m2)+(qnorm(0.025)*sqrt(den_p_f2+den_p_m2))
+
+##upper bound
+(p_hat_f2-p_hat_m2)+(qnorm(0.975)*sqrt(den_p_f2+den_p_m2))
+
+### TWO SAMPLE Diff in PROPORTION - Bootstrap and Randomization Approach
+
+f1 <- sum(dataUS_female$suicides_no)
+f1
+m_1 <- sum(dataUS_male$suicides_no)
+ff <- as.integer(sum(dataUS_female$population)/1000)
+ff
+mx <- as.integer(sum(dataUS_male$population)/1000)
+
+fake_f <- rep(c(1,0), c(f1, (ff-f1)))
+fake_m <- rep(c(1,0), c(m_1, (mx-m_1)))
+
+#Make the Data
+set.seed(111)
+num_sims7 <- 1000
+##A vector to store results
+results5 <- rep(NA, num_sims7)
+##A loop for completing the simulation
+for(i in 1:num_sims7){
+  prop_female <- mean(sample(x=fake_f, size = ff, replace = TRUE))
+  prop_male <- mean(sample(x=fake_m, size = mx, replace = TRUE))
+  results5[i] <- prop_female - prop_male
+}
+##Finally Plot
+hist(results5, freq=FALSE, main = "Dist. of the Diff in Prop", 
+     xlab = "Difference in Prop. of Suicide", ylab = "Density")
+
+##Boostrap
+c(quantile(results5, c(0.025, 0.975)))
+
+##Normal Approximation
+c((p_hat_f2-p_hat_m2)+(qnorm(0.025)*sqrt(den_p_f2+den_p_m2)), 
+  (p_hat_f2-p_hat_m2)+(qnorm(0.975)*sqrt(den_p_f2+den_p_m2)))
+
+#Make Data
+df_combined <- data.frame("population" = c(fake_f, fake_m), 
+                          "sex" = rep(c("female", "male"), c(ff, mx)))
+summary(df_combined)
+
+mean(df_combined$population[df_combined$sex=="female"]) == (p_hat_f2*1000)
+
+mean(df_combined$population[df_combined$sex=="male"]) == (p_hat_m2*1000)
+
+set.seed(111)
+##A vector to store results
+results_given_h0_true3 <- rep(NA, num_sims7)
+##A loop for completing the simulation
+for(i in 1:num_sims7){
+  shuffled_groups2 <- transform(df_combined, sex=sample(sex))
+  prop_f2 <- mean(shuffled_groups2$population[shuffled_groups2$sex=="female"])
+  prop_m2 <- mean(shuffled_groups2$population[shuffled_groups2$sex=="male"])
+  results_given_h0_true3[i] <- prop_f2 - prop_m2
+}
+##Finally plot
+hist(results_given_h0_true3, freq = FALSE, main = "Dist. of the Diff in Sample Sample Props Under Null", 
+     xlab = "Average Difference in prop. Suicide under Null", ylab = "Density")
+
+##Count of values more extreme than the test statistic
+#two sided given the alternate hypothesis
+diff_in_sampleprop <- p_hat_f2 - p_hat_m2
+
+count_of_more_extreme_lower3 <- sum(results_given_h0_true3/1000 <= diff_in_sampleprop)
+count_of_more_extreme_upper3 <- sum(results_given_h0_true3/1000 >= -diff_in_sampleprop)
+
+bootsrtap_p3 <- (count_of_more_extreme_lower3+count_of_more_extreme_upper3)/num_sims7
+
+### Chi-Square Goodnees of Fit Test
+
+##Null Hypothesis: p_r1 = p_r2 = p_r3 = p_r4 = p_r5 = p_r6 = 1/6
+##The proportion fo each age group is the same and is equal to 1/6
+##Alternate Hypothesis: some p_i != 1/6
+##At least one of the proportions is not equal to 1/6
+
+##chi-square with 6 different age ranges
+totalR1 <- sum(data.US$suicides_no[data.US$age=="5-14 years"])
+totalR2 <- sum(data.US$suicides_no[data.US$age=="15-24 years"])
+totalR3 <- sum(data.US$suicides_no[data.US$age=="25-34 years"])
+totalR4 <- sum(data.US$suicides_no[data.US$age=="35-54 years"])
+totalR5 <- sum(data.US$suicides_no[data.US$age=="55-74 years"])
+totalR6 <- sum(data.US$suicides_no[data.US$age=="75+ years"])
+totalR <- sum(data.US$suicides_no)
+avgR <- totalR/6
+
+suicide_age <- matrix(c(totalR1, totalR2, totalR3, totalR4, totalR5, totalR6), ncol=6, byrow=TRUE)
+colnames(suicide_age) <- c("5-14 years", "15-24 years", "25-34 years", "35-54 years", 
+                           "55-74 years", "75+ years")
+suicide_age
+
+prop.table(suicide_age)
+
+##test statistics
+chi <- (((totalR1-avgR)^2)/avgR)+(((totalR2-avgR)^2)/avgR)+(((totalR3-avgR)^2)/avgR)+
+  (((totalR4-avgR)^2)/avgR)+(((totalR5-avgR)^2)/avgR)+(((totalR6-avgR)^2)/avgR)
+
+##p-value
+pchisq(chi, df=6-1, lower.tail=FALSE)
+
+avgR
+totalR/6
+
+sol_under_H0 <- rep(c("5-14 years", "15-24 years", "25-34 years", "35-54 years", 
+                      "55-74 years", "75+ years"), avgR)
+table(sol_under_H0)
+
+set.seed(111)
+num_sims <- 1000
+##A vector to store my results
+chisq_stats_under_H0 <- rep(NA, num_sims)
+##A loop for completing the simulation
+for(i in 1:num_sims){
+  new_sample <- sample(sol_under_H0, totalR, replace=T)
+  chisq_stats_under_H0[i] <- sum(((table(new_sample)-avgR)^2)/avgR)
+}
+
+hist(chisq_stats_under_H0, freq=FALSE, main = "Dist. of the Chi-Square Statistic Under Null", 
+     xlab = "Chi-Square stat under Null", ylab = "Density")
+abline(v=sum(((suicide_age - avgR)^2)/avgR), col="red")
+
+sum(chisq_stats_under_H0 >= sum(((suicide_age)-avgR)^2)/avgR)/ num_sims
+
+## Chi-square association between Two Categorical Variable
+
+
+##Null: The number of suicide is not associated with gender
+##Alternate: The number of suicide is associated with gender
+
+male_R1 <- sum(dataUS_male$suicides_no[dataUS_male$age=="5-14 years"])
+male_R2 <- sum(dataUS_male$suicides_no[dataUS_male$age=="15-24 years"])
+male_R3 <- sum(dataUS_male$suicides_no[dataUS_male$age=="25-34 years"])
+male_R4 <- sum(dataUS_male$suicides_no[dataUS_male$age=="35-54 years"])
+male_R5 <- sum(dataUS_male$suicides_no[dataUS_male$age=="55-74 years"])
+male_R6 <- sum(dataUS_male$suicides_no[dataUS_male$age=="75+ years"])
+female_R1 <- sum(dataUS_female$suicides_no[dataUS_female$age=="5-14 years"])
+female_R2 <- sum(dataUS_female$suicides_no[dataUS_female$age=="15-24 years"])
+female_R3 <- sum(dataUS_female$suicides_no[dataUS_female$age=="25-34 years"])
+female_R4 <- sum(dataUS_female$suicides_no[dataUS_female$age=="35-54 years"])
+female_R5 <- sum(dataUS_female$suicides_no[dataUS_female$age=="55-74 years"])
+female_R6 <- sum(dataUS_female$suicides_no[dataUS_female$age=="75+ years"])
+f_m_age <- matrix(c(female_R1, male_R1, female_R2, male_R2, female_R3, male_R3, female_R4, male_R4, female_R5, male_R5, female_R6, male_R6), ncol=2, byrow=TRUE)
+colnames(f_m_age) <- c("Female", "Male")
+rownames(f_m_age) <- c("5-14 years", "15-24 years", "25-34 years", "35-54 years", "55-74 years", "75+ years")
+f_m_age
+
+ad <- addmargins(f_m_age)
+ad
+
+addmargins((prop.table(f_m_age)))
+
+n2 <- addmargins(f_m_age)[7,3]
+ex_r1_m <- (ad[1,3]*ad[7,2]/n2)
+ex_r1_f <- (ad[1,3]*ad[7,1]/n2)
+ex_r2_m <- (ad[2,3]*ad[7,2]/n2)
+ex_r2_f <- (ad[2,3]*ad[7,1]/n2)
+ex_r3_m <- (ad[3,3]*ad[7,2]/n2)
+ex_r3_f <- (ad[3,3]*ad[7,1]/n2)
+ex_r4_m <- (ad[4,3]*ad[7,2]/n2)
+ex_r4_f <- (ad[4,3]*ad[7,1]/n2)
+ex_r5_m <- (ad[5,3]*ad[7,2]/n2)
+ex_r5_f <- (ad[5,3]*ad[7,1]/n2)
+ex_r6_m <- (ad[6,3]*ad[7,2]/n2)
+ex_r6_f <- (ad[6,3]*ad[7,1]/n2)
+
+chi_sq_stat <- sum(
+  ((ad[1,1]-ex_r1_f)^2)/ex_r1_f,
+  ((ad[2,1]-ex_r2_f)^2)/ex_r2_f,
+  ((ad[3,1]-ex_r3_f)^2)/ex_r3_f,
+  ((ad[4,1]-ex_r4_f)^2)/ex_r4_f,
+  ((ad[5,1]-ex_r5_f)^2)/ex_r5_f,
+  ((ad[6,1]-ex_r6_f)^2)/ex_r6_f,
+  ((ad[1,2]-ex_r1_m)^2)/ex_r1_m,
+  ((ad[2,2]-ex_r2_m)^2)/ex_r2_m,
+  ((ad[3,2]-ex_r3_m)^2)/ex_r3_m,
+  ((ad[4,2]-ex_r4_m)^2)/ex_r4_m,
+  ((ad[5,2]-ex_r5_m)^2)/ex_r5_m,
+  ((ad[6,2]-ex_r6_m)^2)/ex_r6_m
+)
+chi_sq_stat
+
+pchisq(chi_sq_stat, df = (6-1)*(2-1), lower.tail = FALSE)
+
+
